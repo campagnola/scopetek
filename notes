@@ -58,7 +58,8 @@ All configuration packets look like:
     < URB_CONTROL out, response data=0   [unless wLength == 0]
     < Satus response 02
 
-
+    bmRequestType==0x40  =>  Direction: Host-to-device  Type: Vendor  Recipient: Device
+    bmRequestType==0xc0  =>  Direction: Device-to-host  Type: Vendor  Recipient: Device
     
 Software startup:
 No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
@@ -77,19 +78,19 @@ No.  bmRequestType  bRequest  wValue  wIndex  wLength  data
 
 Select 640x480 resolution:
 No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
-346  0x40           179       0       0       0                   # request next frame?
+346  0x40           179       0       0       0                   # queue next frame?
 348  0x40           187       0       0       10       0          # stop
 351  0x40           180       0xc8    0       10       0          # set resolution
-356  0x40           179       0       0       10       0
+356  0x40           179       0       0       10       0          # queue next frame?
 359  0x40           183       0x19    0x6     0
 361  0xc0           182       0       0x11    10       0x 24 03
 364  0x40           181       0xa1    0       10       0          # set normal/fast frame speed mode
 367  0x40           183       0x28    0x35    10       0          
 370  0x40           183       0x34    0x9     10       0  
 373  0x40           181       0xa0    0       10       0
-376  0x40           183       0x10    0x35    10       0         # set gain
-379  0x40           183       0x2d6   0x9     10       0         # set exposure
-    [ frame data begins arriving ]
+376  0x40           183       0x10    0x35    10       0          # set gain
+379  0x40           183       0x2d6   0x9     10       0          # set exposure
+    [ frame data begins arriving; 640*480 + 512 bytes per frame ]
 
 
 Select 1024x768 resolution:
@@ -106,7 +107,7 @@ No.  bmRequestType  bRequest  wValue  wIndex  wLength  data
 566  0x40           181       0xa0    0       10       0
 569  0x40           183       0x10    0x35    10       0
 572  0x40           183       0x246   0x9     10       0
-    [ frame data begins arriving ]
+    [ frame data begins arriving; 1024*768 + 512 bytes per frame ]
 
 
 Select 1280x960 resolution:
@@ -123,7 +124,7 @@ No.  bmRequestType  bRequest  wValue  wIndex  wLength  data
 472  0x40           181       0xa0    0       10       0
 475  0x40           183       0x10    0x35    10       0
 478  0x40           183       0x202   0x9     10       0
-    [ frame data begins arriving ]
+    [ frame data begins arriving; 1280*960 + 512 bytes per frame ]
 
 
 Select 2592x1944 resolution:
@@ -140,7 +141,7 @@ No.  bmRequestType  bRequest  wValue  wIndex  wLength  data
 496  0x40           181       0xa0    0       10       0
 499  0x40           183       0x10    0x35    10       0
 502  0x40           183       0x141   0x9     10       0
-    [ frame data begins arriving ]
+    [ frame data begins arriving; 2592*1944 + 256 bytes per frame ]
 
 
 Set exposure to 50 ms:  
