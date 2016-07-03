@@ -1,0 +1,177 @@
+USB setup packet structure:   (http://www.beyondlogic.org/usbnutshell/usb6.shtml)
+    Offset  Field           Size    Value           Description
+    0       bmRequestType   1       Bit-Map         D7 Data Phase Transfer Direction
+                                                    0 = Host to Device
+                                                    1 = Device to Host
+                                                    D6..5 Type
+                                                    0 = Standard
+                                                    1 = Class
+                                                    2 = Vendor
+                                                    3 = Reserved
+                                                    D4..0 Recipient
+                                                    0 = Device
+                                                    1 = Interface
+                                                    2 = Endpoint
+                                                    3 = Other
+                                                    4..31 = Reserved
+    1       bRequest        1       Value           Request
+    2       wValue          2       Value           Value
+    4       wIndex          2       Index or Offset Index
+    6       wLength         2       Count           Number of bytes to transfer if there is a data phase
+
+Standard bRequest values:   (http://www.beyondlogic.org/usbnutshell/usb6.shtml)
+    Device requests:
+    bmRequestType  bRequest                 wValue                   wIndex               wLength             Data
+    1000 0000b     GET_STATUS (0x00)        Zero                     Zero                 Two                 Device Status
+    0000 0000b     CLEAR_FEATURE (0x01)     Feature Selector         Zero                 Zero                None
+    0000 0000b     SET_FEATURE (0x03)       Feature Selector         Zero                 Zero                None
+    0000 0000b     SET_ADDRESS (0x05)       Device Address           Zero                 Zero                None
+    1000 0000b     GET_DESCRIPTOR (0x06)    Descriptor Type & Index  Zero or Language ID  Descriptor Length   Descriptor
+    0000 0000b     SET_DESCRIPTOR (0x07)    Descriptor Type & Index  Zero or Language ID  Descriptor Length   Descriptor
+    1000 0000b     GET_CONFIGURATION (0x08) Zero                     Zero                 1                   Configuration Value
+    0000 0000b     SET_CONFIGURATION (0x09) Configuration Value      Zero                 Zero                None    
+
+    Interface requests:
+    bmRequestType  bRequest                 wValue                   wIndex               wLength             Data
+    1000 0001b     GET_STATUS (0x00)        Zero                     Interface            Two                 Interface Status
+    0000 0001b     CLEAR_FEATURE (0x01)     Feature Selector         Interface            Zero                None
+    0000 0001b     SET_FEATURE (0x03)       Feature Selector         Interface            Zero                None
+    1000 0001b     GET_INTERFACE (0x0A)     Zero                     Interface            One                 Alternate Interface
+    0000 0001b     SET_INTERFACE (0x11)     Alternative Setting      Interface            Zero                None
+
+    Endpoint requests:
+    bmRequestType  bRequest                 wValue                   wIndex               wLength             Data
+    1000 0010b     GET_STATUS (0x00)        Zero                     Endpoint             Two                 Endpoint Status
+    0000 0010b     CLEAR_FEATURE (0x01)     Feature Selector         Endpoint             Zero                None
+    0000 0010b     SET_FEATURE (0x03)       Feature Selector         Endpoint             Zero                None
+    1000 0010b     SYNCH_FRAME (0x12)       Zero                     Endpoint             Two                 FrameNumber
+
+
+
+Receiving frame from camera:
+[1 or more URB_BULK in]
+No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
+     0x40           179       0       0       0
+
+All configuration packets look like:
+    > URB_CONTROL out, bmRequestType=xxx, bRequest=xxx, wValue=xxx, wIndex=xxx, wLength=xxx
+    < URB_CONTROL out, response data=0   [unless wLength == 0]
+    < Satus response 02
+
+
+    
+Software startup:
+No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
+10   0x40           180       0xc0    0       10       0
+13   0x40           179       0       0       10       0
+16   0x40           183       0xa0    6       0
+18   0xc0           182       0       0x11    10       0x 24 03
+21   0x40           181       0xa1    0       10       0
+24   0x40           183       0x28    0x35    10       0
+27   0x40           183       0x34    0x9     10       0  
+30   0x40           181       0xa0    0       10       0
+33   0x40           183       0x10    0x35    10       0
+36   0x40           183       0x140   0x9     10       0
+    [ frame data begins arriving ]
+
+
+Select 640x480 resolution:
+No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
+346  0x40           179       0       0       0                   # request next frame?
+348  0x40           187       0       0       10       0          # stop
+351  0x40           180       0xc8    0       10       0          # set resolution
+356  0x40           179       0       0       10       0
+359  0x40           183       0x19    0x6     0
+361  0xc0           182       0       0x11    10       0x 24 03
+364  0x40           181       0xa1    0       10       0          # set normal/fast frame speed mode
+367  0x40           183       0x28    0x35    10       0          
+370  0x40           183       0x34    0x9     10       0  
+373  0x40           181       0xa0    0       10       0
+376  0x40           183       0x10    0x35    10       0         # set gain
+379  0x40           183       0x2d6   0x9     10       0         # set exposure
+    [ frame data begins arriving ]
+
+
+Select 1024x768 resolution:
+No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
+541  0x40           179       0       0       0
+543  0x40           187       0       0       10       0
+546  0x40           180       0xc7    0       10       0
+549  0x40           179       0       0       10       0
+552  0x40           183       0x19    0x6     0
+554  0xc0           182       0       0x11    10       0x 24 03
+557  0x40           181       0xa1    0       10       0
+560  0x40           183       0x28    0x35    10       0
+563  0x40           183       0x34    0x9     10       0  
+566  0x40           181       0xa0    0       10       0
+569  0x40           183       0x10    0x35    10       0
+572  0x40           183       0x246   0x9     10       0
+    [ frame data begins arriving ]
+
+
+Select 1280x960 resolution:
+No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
+446  0x40           179       0       0       0
+449  0x40           187       0       0       10       0
+452  0x40           180       0xc6    0       10       0
+455  0x40           179       0       0       10       0
+458  0x40           183       0x19    0x6     0
+460  0xc0           182       0       0x11    10       0x 24 03
+463  0x40           181       0xa1    0       10       0
+466  0x40           183       0x28    0x35    10       0
+469  0x40           183       0x34    0x9     10       0  
+472  0x40           181       0xa0    0       10       0
+475  0x40           183       0x10    0x35    10       0
+478  0x40           183       0x202   0x9     10       0
+    [ frame data begins arriving ]
+
+
+Select 2592x1944 resolution:
+No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
+470  0x40           179       0       0       0
+473  0x40           187       0       0       10       0
+476  0x40           180       0xc0    0       10       0
+479  0x40           179       0       0       10       0
+482  0x40           183       0xa0    0x6     0
+484  0xc0           182       0       0x11    10       0x 24 03
+487  0x40           181       0xa1    0       10       0
+490  0x40           183       0x28    0x35    10       0
+493  0x40           183       0x34    0x9     10       0  
+496  0x40           181       0xa0    0       10       0
+499  0x40           183       0x10    0x35    10       0
+502  0x40           183       0x141   0x9     10       0
+    [ frame data begins arriving ]
+
+
+Set exposure to 50 ms:  
+No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
+561  0x40           183       0x2d5   9       10       0     (exposure is unchanged 31 ms to 31 ms at this point)
+1060 0x40           183       0x491   9       10       0     (exposure goes from 31 ms to 50 ms at this point)
+
+Set exposure to 131 ms:  (max allowed exposure for fast speed mode)
+No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
+426  0x40           183       0xbf7   9       10       0     (50 ms -> 131 ms)
+
+Set "normal" frame speed mode:
+No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
+77   0x40           181       0xa1    0       10       0
+83   0x40           183       0x5fc   9       10       0     (131 ms -> 131 ms)
+
+Set exposure to 262 ms:  (max allowed exposure for normal speed mode)
+No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
+125  0x40           183       0x62a   9       10       0    (131 ms 
+128  0x40           183       0xa3b   9       10       0         -
+131  0x40           183       0xbf7   9       10       0         262 ms)
+
+Set gain to 4:   (sliding w/ mouse generates multiple redundant updates)
+No.  bmRequestType  bRequest  wValue  wIndex  wLength  data    
+93   0x40           183       0x10    0x35    10       0      gain=1
+99   0x40           183       0x11    0x35    10       0      gain=2
+102  0x40           183       0x11    0x35    10       0
+105  0x40           183       0x11    0x35    10       0
+108  0x40           183       0x11    0x35    10       0
+111  0x40           183       0x12    0x35    10       0      gain=3
+114  0x40           183       0x12    0x35    10       0
+120  0x40           183       0x13    0x35    10       0      gain=4
+
+    
