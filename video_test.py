@@ -4,7 +4,7 @@ from scopetek import Scopetek, StreamThread
 # Initialize camera
 cam = Scopetek()
 # Set camera parameters
-cam.setup(resolution=(640,480), fast=True, exposure=30e-3, gain=1)
+cam.setup(resolution=(640,480), fast=True, exposure=70e-3, gain=1)
 cam.auto_white_balance()
 
 imv = pg.image()

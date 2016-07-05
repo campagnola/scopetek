@@ -166,6 +166,7 @@ class StreamThread(threading.Thread):
     def stop(self):
         with self.stop_lock:
             self._stop = True
+        self.join()
 
     def get_first(self):
         """Return the oldest frame in the queue, or None if the queue is empty.
