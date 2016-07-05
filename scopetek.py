@@ -118,7 +118,7 @@ class Scopetek:
         self.dev.ctrl_transfer(bmRequestType=0x40, bRequest=179, wValue=0, wIndex=0)
         
         # make a Frame instance
-        d1 = np.array(data)
+        d1 = np.frombuffer(data, dtype='ubyte')
         d2 = d1[extra:].reshape(self.resolution[1], self.resolution[0])
         frame = Frame(d2, wb=self.white_balance)
 
