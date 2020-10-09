@@ -8,8 +8,14 @@ https://github.com/walac/pyusb/blob/master/docs/tutorial.rst
 import sys
 import threading
 import time
-import Queue
-import usb.core
+try:
+    import Queue
+except ImportError:
+    import queue as Queue
+try:
+    import usb.core
+except ImportError:
+    raise Exception("Could not import usb.core (try installing pyusb)")
 import numpy as np
 
 
@@ -32,7 +38,7 @@ class Scopetek:
     def __init__(self):
         dev = usb.core.find(idVendor=0x547)
         if dev is None:
-            print "No cameras found!"
+            print("No cameras found!")
             sys.exit(-1)
 
         cfg = dev[0]
@@ -43,7 +49,7 @@ class Scopetek:
             cfg.set()
         except usb.core.USBError as err:
             if err.errno == 13:
-                print permission_error_msg
+                print(permission_error_msg)
                 sys.exit(-1)
         
         self.dev = dev
